@@ -38,7 +38,7 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     try {
-      const tasks = await Task.find().sort({ date: -1 });
+      const tasks = await Task.find({user:req.user.id}).sort({ date: -1 });
       res.json(tasks);
     } catch (err) {
       console.error(err);
