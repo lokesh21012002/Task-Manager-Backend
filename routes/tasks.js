@@ -12,15 +12,21 @@ const Task = require('../models/Task');
 router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    const newTask = new Task({
-      title: req.body.title,
-      description: req.body.description,
-      status: req.body.status,
-      user: req.user.id
-    });
+  async (req, res) => {
+    try {
+      const newTask = new Task({
+        title: req.body.title,
+        description: req.body.description,
+        status: req.body.status,
+        user: req.user.id
+      });
 
-    newTask.save().then(task => res.json(task));
+      const task = await newTask.save();
+      res.json(task);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+    }
   }
 );
 
@@ -30,11 +36,14 @@ router.post(
 router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Task.find({ user: req.user.id })
-      .sort({ date: -1 })
-      .then(tasks => res.json(tasks))
-      .catch(err => res.status(404).json({ notasksfound: 'No tasks found' }));
+  async (req, res) => {
+    try {
+      const tasks = await Task.find({ user: req.user.id }).sort({ date: -1 });
+      res.json(tasks);
+    } catch (err) {
+      console.error(err);
+      res.status(404).json({ notasksfound: 'No tasks found' });
+    }
   }
 );
 
@@ -44,23 +53,23 @@ router.get(
 router.delete(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    console.log(req.params.id
-    );
-    Task.findById(req.params.id)
-      .then(task => {
-        // console.log(task._id.toString() !=req.params.id);
-        if (task._id.toString() != req.params.id) {
-          return res.status(401).json({ notauthorized: 'User not authorized' });
-        }
-        task.deleteOne().then(() => res.json({ success: true }));
-      })
-      .catch((err)=>{
-        console.log(err);
-        res.status(404).json({ notaskfound: 'No task found' });
+  async (req, res) => {
+    try {
+      const task = await Task.findById(req.params.id);
+      if (!task) {
+        return res.status(404).json({ notaskfound: 'No task found' });
+      }
 
-      });
-       
+      if (task.user.toString() !== req.user.id) {
+        return res.status(401).json({ notauthorized: 'User not authorized' });
+      }
+
+      await task.deleteOne();
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+    }
   }
 );
 
@@ -70,22 +79,27 @@ router.delete(
 router.put(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
-    Task.findById(req.params.id)
-      .then(task => {
-        console.log(task);
-        if (task.user.toString() !== req.user.id) {
-          return res.status(401).json({ notauthorized: 'User not authorized' });
-        }
+  async (req, res) => {
+    try {
+      const task = await Task.findById(req.params.id);
+      if (!task) {
+        return res.status(404).json({ tasknotfound: 'No task found' });
+      }
 
-        task.title = req.body.title || task.title;
-        task.description = req.body.description || task.description;
-        task.status = req.body.status || task.status;
-        console.log("Updated--->",task);
+      if (task.user.toString() !== req.user.id) {
+        return res.status(401).json({ notauthorized: 'User not authorized' });
+      }
 
-        task.save().then(task => res.json(task));
-      })
-      .catch(err => res.status(404).json({ tasknotfound: 'No task found' }));
+      task.title = req.body.title || task.title;
+      task.description = req.body.description || task.description;
+      task.status = req.body.status || task.status;
+
+      const updatedTask = await task.save();
+      res.json(updatedTask);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+    }
   }
 );
 
