@@ -5,6 +5,8 @@ const passport = require('passport');
 const users = require('./routes/users');
 const cors=require("cors");
 const tasks = require('./routes/tasks');
+require('dotenv').config();
+
 
 const app = express();
 
@@ -19,7 +21,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // DB Config
-const db = require('./config/keys').mongoURI;
+// const db = require('./config/keys').mongoURI;
+const db=process.env.mongoURI
+
 
 // Connect to MongoDB
 mongoose
@@ -36,6 +40,7 @@ require('./config/passport')(passport);
 // Routes
 app.use('/api/users', users);
 app.use('/api/tasks', tasks);
+// console.log(process.env.PORT);
 
 const port = process.env.PORT || 5000;
 

@@ -1,8 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
 const router = express.Router();
+require('dotenv').config();
 
 // Load User model
 const User = require('../models/User');
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
     const token = await new Promise((resolve, reject) => {
       jwt.sign(
         payload,
-        keys.secretOrKey,
+        process.env.secretOrKey,
         { expiresIn: 31556926 },
         (err, token) => {
           if (err) reject(err);
