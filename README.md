@@ -30,9 +30,9 @@ The Task Manager Application is a full-stack project that allows users to manage
 
 ## Clone the repository
 
-### `git clone https://github.com/yourusername/task-manager.git`
+### `git clone https://github.com/lokesh21012002/Task-Manager-Backend.git`
 
-### `cd task-manager/`
+### `cd task-manager-app/`
 
 ### `npm install`
 
@@ -40,9 +40,11 @@ The Task Manager Application is a full-stack project that allows users to manage
 
 Create a .env file in the backend directory and add the following environment variables:
 
-### `MONGO_URI=your_mongo_db_uri`
+### `mongoURI=your_mongo_db_uri`
 
-### `JWT_SECRET=your_jwt_secret`
+### `secretOrKey=your_jwt_secret`
+
+### `PORT=5000`
 
 ## Run the backend server
 
